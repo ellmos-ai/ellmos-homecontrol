@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ellmos-homecontrol"
+version = "0.1.0"
+description = "SmartHome and household appliance control hub (FritzBox TR-064/DECT, Home Assistant, Matter/Thread, MQTT/Shelly) for BACH & Open-Ocean."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "ellmos-ai" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+ellmos-homecontrol = "ellmos_homecontrol.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

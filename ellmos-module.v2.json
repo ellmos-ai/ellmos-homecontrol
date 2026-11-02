@@ -1,0 +1,13 @@
+{
+  "schema": "ellmos.module.v2",
+  "id": "ellmos-homecontrol",
+  "name": "ellmos-homecontrol",
+  "version": "0.1.0",
+  "category": "smarthome-iot",
+  "description": "SmartHome and household appliance control hub (FritzBox, Home Assistant, Matter, MQTT/Shelly).",
+  "repository": "https://github.com/ellmos-ai/ellmos-homecontrol",
+  "entrypoints": {
+    "python": "ellmos_homecontrol.hub",
+    "cli": "ellmos_homecontrol.cli:main"
+  }
+}
