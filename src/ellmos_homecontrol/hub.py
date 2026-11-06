@@ -116,6 +116,8 @@ class HomeControlHub:
 
     def __init__(self, devices: list[HomeDevice] | None = None, *, smarthome_permission: bool = True):
         self.smarthome_permission = smarthome_permission
+        # Built-in sample devices are simulated data and must say so (Nutzerentscheidung E3).
+        self.demo = devices is None
         self.fritzbox = FritzBoxAdapter()
         self.homeassistant = HomeAssistantAdapter()
         self.matter = MatterBridgeAdapter()
@@ -171,6 +173,9 @@ class HomeControlHub:
             },
         }
 
+    def _out(self, dev: HomeDevice) -> dict[str, Any]:
+        return {**dev.as_dict(), "demo": self.demo}
+
     def _require_permission(self) -> None:
         if not self.smarthome_permission:
             raise PermissionError("SmartHome access is disabled in Permissions (smarthome_robotics=False).")
@@ -180,13 +185,13 @@ class HomeControlHub:
         items = list(self._devices.values())
         if adapter:
             items = [d for d in items if d.adapter == adapter]
-        return [d.as_dict() for d in items]
+        return [self._out(d) for d in items]
 
     def hc_get_state(self, device_id: str) -> dict[str, Any]:
         self._require_permission()
         if device_id not in self._devices:
             raise KeyError(f"Unknown device_id: {device_id}")
-        return self._devices[device_id].as_dict()
+        return self._out(self._devices[device_id])
 
     def hc_set_state(
         self,
@@ -211,7 +216,7 @@ class HomeControlHub:
         merged_state = {**dev.state, **target_state}
         updated = replace(dev, state=merged_state)
         self._devices[device_id] = updated
-        return updated.as_dict()
+        return self._out(updated)
 
     def hc_scene_activate(self, scene_id: str) -> dict[str, Any]:
         self._require_permission()
@@ -222,13 +227,14 @@ class HomeControlHub:
             if dev_id in self._devices:
                 self.hc_set_state(dev_id, patch, confirmed=True)
                 applied.append(dev_id)
-        return {"scene_id": scene_id, "applied_devices": applied}
+        return {"scene_id": scene_id, "applied_devices": applied, "demo": self.demo}
 
     def hc_energy_status(self) -> dict[str, Any]:
         self._require_permission()
         total_watts = round(sum(d.power_watts for d in self._devices.values()), 2)
         return {
             "schema": "ellmos.homecontrol.energy.v1",
+            "demo": self.demo,
             "total_power_watts": total_watts,
             "device_count": len(self._devices),
             "by_adapter": {
