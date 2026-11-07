@@ -54,3 +54,21 @@ def test_cli_commands(capsys):
     assert main(["energy"]) == 0
     out = json.loads(capsys.readouterr().out)
     assert out["device_count"] == 4
+
+
+def test_demo_data_is_marked_demo():
+    hub = HomeControlHub()
+    assert all(d["demo"] is True for d in hub.hc_list_devices())
+    assert hub.hc_get_state("ha.light.studio_main")["demo"] is True
+    assert hub.hc_energy_status()["demo"] is True
+    assert hub.hc_scene_activate("focus_work")["demo"] is True
+    assert hub.hc_set_state("ha.light.studio_main", {"on": False})["demo"] is True
+
+
+def test_custom_devices_are_not_marked_demo():
+    from ellmos_homecontrol import HomeDevice
+
+    dev = HomeDevice("x.plug", "Plug", "fritzbox", "plug", {"on": True})
+    hub = HomeControlHub(devices=[dev])
+    assert hub.hc_list_devices()[0]["demo"] is False
+    assert hub.hc_energy_status()["demo"] is False
