@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
+import re
 from typing import Any
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
+from xml.sax.saxutils import escape
+
+_XML_ENTITIES = {'"': '&quot;', "'": '&apos;'}
+_XML_TAG_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
 
 
 class HighLoadConfirmationRequiredError(PermissionError):
@@ -35,6 +40,8 @@ class FritzBoxAdapter:
         self.base_url = base_url.rstrip("/")
 
     def tr064_call(self, service: str, action: str, params: dict[str, Any] | None = None) -> str | None:
+        if not (isinstance(action, str) and _XML_TAG_RE.fullmatch(action)):
+            return None
         control_map = {
             "urn:dslforum-org:service:WANIPConnection:1": "/igdupnp/control/WANIPConn1",
             "urn:dslforum-org:service:WANCommonInterfaceConfig:1": "/igdupnp/control/WANCommonIFC1",
@@ -47,21 +54,28 @@ class FritzBoxAdapter:
         param_xml = ""
         if params:
             for k, v in params.items():
-                param_xml += f"<{k}>{v}</{k}>"
+                if not (isinstance(k, str) and _XML_TAG_RE.fullmatch(k)):
+                    return None
+                esc_v = escape(str(v), _XML_ENTITIES)
+                param_xml += f"<{k}>{esc_v}</{k}>"
+        esc_service = escape(service, _XML_ENTITIES)
+        esc_action = escape(action, _XML_ENTITIES)
         body = (
             '<?xml version="1.0" encoding="utf-8"?>'
             '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" '
             's:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
             "<s:Body>"
-            f'<u:{action} xmlns:u="{service}">{param_xml}</u:{action}>'
+            f'<u:{esc_action} xmlns:u="{esc_service}">{param_xml}</u:{esc_action}>'
             "</s:Body></s:Envelope>"
         )
+        clean_service = service.replace("\r", "").replace("\n", "")
+        clean_action = action.replace("\r", "").replace("\n", "")
         req = urllib.request.Request(
             url,
             data=body.encode("utf-8"),
             headers={
                 "Content-Type": 'text/xml; charset="utf-8"',
-                "SOAPAction": f'"{service}#{action}"',
+                "SOAPAction": f'"{clean_service}#{clean_action}"',
             },
         )
         try:

@@ -72,3 +72,41 @@ def test_custom_devices_are_not_marked_demo():
     hub = HomeControlHub(devices=[dev])
     assert hub.hc_list_devices()[0]["demo"] is False
     assert hub.hc_energy_status()["demo"] is False
+
+
+def test_tr064_soap_injection_is_escaped_or_rejected():
+    from unittest.mock import MagicMock, patch
+
+    fb = FritzBoxAdapter()
+
+    # 1. Parameter value with XML tags must be escaped
+    resp = MagicMock()
+    resp.read.return_value = b"<s:Envelope/>"
+    resp.__enter__ = lambda s: s
+    resp.__exit__ = MagicMock(return_value=False)
+
+    with patch("urllib.request.urlopen", return_value=resp) as m:
+        fb.tr064_call(
+            "urn:dslforum-org:service:DeviceInfo:1",
+            "GetInfo",
+            params={"NewEnable": "1</NewEnable><injected>pwned</injected><NewEnable>1"},
+        )
+    assert m.called
+    sent_body = m.call_args[0][0].data.decode("utf-8")
+    assert "<injected>pwned</injected>" not in sent_body
+    assert "&lt;injected&gt;pwned&lt;/injected&gt;" in sent_body
+
+    # 2. Invalid action name with XML tag injection must be rejected without network
+    with patch("urllib.request.urlopen") as m:
+        assert fb.tr064_call("urn:dslforum-org:service:DeviceInfo:1", "GetInfo><evil/>") is None
+        m.assert_not_called()
+
+    # 3. Invalid argument key with XML tag injection must be rejected without network
+    with patch("urllib.request.urlopen") as m:
+        assert fb.tr064_call(
+            "urn:dslforum-org:service:DeviceInfo:1",
+            "GetInfo",
+            params={"bad<tag>": "1"},
+        ) is None
+        m.assert_not_called()
+
