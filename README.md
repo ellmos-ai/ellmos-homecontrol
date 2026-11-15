@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="ellmos-homecontrol banner" width="100%">
+</p>
+
 # ellmos-homecontrol
 
 **English** | [Deutsch](README_de.md)
