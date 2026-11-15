@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
+  <defs>
+    <style>
+      .font-sans {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      }
+      .font-mono {
+        font-family: 'Cascadia Code', Consolas, Monaco, monospace;
+      }
+    </style>
+
+    <!-- Background Gradients -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080c14" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#07090e" />
+    </linearGradient>
+
+    <!-- Title Gradient -->
+    <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="65%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <!-- Ambient Glow Radials -->
+    <radialGradient id="glow-p" cx="170" cy="140" r="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#080c14" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow-s" cx="550" cy="160" r="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#080c14" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Drop Shadow Filter for Glassmorphic Elements -->
+    <filter id="drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Background Base Layer -->
+  <rect width="1200" height="300" fill="url(#bg-grad)" />
+
+  <!-- Technical Coordinate Grid Overlay -->
+  <g opacity="0.07" stroke="#94a3b8" stroke-width="1">
+    <path d="M0 50 H1200 M0 100 H1200 M0 150 H1200 M0 200 H1200 M0 250 H1200" />
+    <path d="M100 0 V300 M200 0 V300 M300 0 V300 M400 0 V300 M500 0 V300 M600 0 V300 M700 0 V300 M800 0 V300 M900 0 V300 M1000 0 V300 M1100 0 V300" />
+  </g>
+
+  <!-- Ambient Glow Orbs -->
+  <circle cx="170" cy="140" r="200" fill="url(#glow-p)" />
+  <circle cx="550" cy="160" r="220" fill="url(#glow-s)" />
+
+  <!-- Left Accent Bar -->
+  <rect x="0" y="0" width="5" height="300" fill="#38bdf8" />
+
+  <!-- Left Domain Graphic Motif (x=40..310, y=30..270) -->
+  
+    <!-- Ellmos Homecontrol: Smart-Home Bus Mesh & Safety Confirmation Gate -->
+    <g transform="translate(45, 35)">
+      <!-- Smart-Home Wireframe Outline -->
+      <g transform="translate(45, 35)">
+        <polygon points="85,5 170,50 0,50" fill="#0f172a" stroke="#38bdf8" stroke-width="1.8"/>
+        <rect x="15" y="50" width="140" height="90" fill="#080c14" stroke="#38bdf8" stroke-width="1.8" filter="url(#drop-shadow)"/>
+        
+        <!-- Smart Devices inside Home -->
+        <rect x="25" y="60" width="36" height="22" rx="4" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+        <text x="28" y="74" class="font-mono" font-size="7" font-weight="700" fill="#f59e0b">ROUTER</text>
+
+        <rect x="25" y="100" width="36" height="22" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+        <text x="28" y="114" class="font-mono" font-size="7" font-weight="700" fill="#38bdf8">PLUG</text>
+
+        <rect x="105" y="60" width="38" height="22" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+        <text x="108" y="74" class="font-mono" font-size="7" font-weight="700" fill="#38bdf8">CLIMA</text>
+
+        <circle cx="85" cy="95" r="12" fill="#0284c7" fill-opacity="0.3" stroke="#f59e0b" stroke-width="1.5"/>
+        <circle cx="85" cy="95" r="4" fill="#f59e0b"/>
+
+        <line x1="61" y1="71" x2="75" y2="88" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="2 2"/>
+        <line x1="61" y1="111" x2="75" y2="102" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="2 2"/>
+        <line x1="105" y1="71" x2="95" y2="88" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="2 2"/>
+      </g>
+
+      <!-- High-Load Safety Confirmation Gate -->
+      <g transform="translate(150, 135)">
+        <rect width="65" height="35" rx="6" fill="#1c1917" stroke="#f59e0b" stroke-width="1.5" filter="url(#drop-shadow)"/>
+        <text x="7" y="15" class="font-mono" font-size="6.5" font-weight="700" fill="#f59e0b">SAFETY GATE</text>
+        <text x="7" y="27" class="font-mono" font-size="6.5" fill="#fde68a">HIGH-LOAD: CONF</text>
+      </g>
+
+      <!-- Protocol Badges -->
+      <g transform="translate(45, 185)">
+        <rect width="170" height="20" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+        <text x="10" y="14" class="font-mono" font-size="7.5" font-weight="700" fill="#e2e8f0">FRITZBOX · HOME ASST · MATTER</text>
+      </g>
+    </g>
+    
+
+  <!-- Vertical Divider Line -->
+  <line x1="330" y1="35" x2="330" y2="265" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.4"/>
+
+  <!-- Right Branding & Meta Information (x=360..1160) -->
+  <g transform="translate(360, 0)">
+    <!-- Top Category Badge -->
+    <g transform="translate(0, 48)">
+      <rect width="272.8" height="24" rx="5" fill="#38bdf8" fill-opacity="0.14" stroke="#38bdf8" stroke-width="1"/>
+      <text x="12" y="16" class="font-mono" font-size="10.5" font-weight="700" letter-spacing="1.2" fill="#38bdf8">ELLMOS-AI // IOT // DEVICE CONTROL</text>
+    </g>
+
+    <!-- Repository Title -->
+    <text x="0" y="122" class="font-sans" font-size="44" font-weight="800" letter-spacing="-1" fill="url(#title-grad)">ellmos-homecontrol</text>
+
+    <!-- English Subtitle / Tagline -->
+    <text x="0" y="158" class="font-sans" font-size="17" font-weight="500" fill="#94a3b8">Smart-Home &amp; Appliance Hub with High-Load Safety Gates</text>
+
+    <!-- Feature Pills -->
+    <g transform="translate(0, 214)">
+      
+        <g transform="translate(0, 0)">
+          <rect width="158" height="30" rx="15" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+          <text x="79.0" y="19" class="font-sans" font-size="12" font-weight="600" fill="#f1f5f9" text-anchor="middle">🏠 Home Assistant</text>
+        </g>
+        
+
+        <g transform="translate(170, 0)">
+          <rect width="166" height="30" rx="15" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+          <text x="83.0" y="19" class="font-sans" font-size="12" font-weight="600" fill="#f1f5f9" text-anchor="middle">📶 FritzBox TR-064</text>
+        </g>
+        
+
+        <g transform="translate(348, 0)">
+          <rect width="196" height="30" rx="15" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+          <text x="98.0" y="19" class="font-sans" font-size="12" font-weight="600" fill="#f1f5f9" text-anchor="middle">⚡ Safety Confirmation</text>
+        </g>
+        
+
+        <g transform="translate(556, 0)">
+          <rect width="151" height="30" rx="15" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+          <text x="75.5" y="19" class="font-sans" font-size="12" font-weight="600" fill="#f1f5f9" text-anchor="middle">🌐 Matter / MQTT</text>
+        </g>
+        
+    </g>
+  </g>
+</svg>
