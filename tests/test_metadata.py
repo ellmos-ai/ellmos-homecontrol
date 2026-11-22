@@ -24,6 +24,7 @@ def test_pyproject_pep621_and_pep639_metadata():
     data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
 
     project = data["project"]
+    assert any("setuptools>=77.0.3" in req for req in data["build-system"]["requires"])
     assert project["name"] == "ellmos-homecontrol"
     assert project["version"] == "0.1.0"
     assert ellmos_homecontrol.__version__ == project["version"]
