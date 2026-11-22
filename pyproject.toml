@@ -9,18 +9,55 @@ description = "SmartHome and household appliance control hub (FritzBox TR-064/DE
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
+license-files = ["LICENSE", "CONTRIBUTING.md"]
 authors = [{ name = "ellmos-ai" }]
+keywords = [
+    "automation",
+    "bach",
+    "cli",
+    "ellmos",
+    "ellmos-ai",
+    "fritzbox",
+    "home-automation",
+    "homeassistant",
+    "local-first",
+    "matter",
+    "mqtt",
+    "open-bricks",
+    "open-ocean",
+    "python",
+    "shelly",
+    "smart-home",
+    "tr-064",
+    "zero-dependencies",
+]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Home Automation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/ellmos-ai/ellmos-homecontrol"
+Repository = "https://github.com/ellmos-ai/ellmos-homecontrol"
+Documentation = "https://github.com/ellmos-ai/ellmos-homecontrol#readme"
+Issues = "https://github.com/ellmos-ai/ellmos-homecontrol/issues"
+Changelog = "https://github.com/ellmos-ai/ellmos-homecontrol/blob/main/CHANGELOG.md"
+Contributing = "https://github.com/ellmos-ai/ellmos-homecontrol/blob/main/CONTRIBUTING.md"
+Security = "https://github.com/ellmos-ai/ellmos-homecontrol/blob/main/SECURITY.md"
+"Parent Organization" = "https://github.com/ellmos-ai"
+"Umbrella Ecosystem" = "https://github.com/open-bricks"
+
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "ruff>=0.5"]
 
 [project.scripts]
 ellmos-homecontrol = "ellmos_homecontrol.cli:main"
@@ -28,7 +65,32 @@ ellmos-homecontrol = "ellmos_homecontrol.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+ellmos_homecontrol = ["py.typed"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+addopts = "-ra -v"
+norecursedirs = [
+    ".git",
+    ".pytest_cache",
+    ".pytest_temp",
+    ".pytest_tmp*",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    ".hypothesis",
+    ".tox",
+]
+xfail_strict = true
 
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W", "B", "SIM", "C4"]
+ignore = []

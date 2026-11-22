@@ -92,8 +92,6 @@ class FritzBoxAdapter:
                 if elem.tag.endswith(tag):
                     return elem.text
         except ET.ParseError:
-            import re
-
             m = re.search(rf"<(?:\w+:)?{re.escape(tag)}>(.*?)</(?:\w+:)?{re.escape(tag)}>", xml_str, re.DOTALL)
             if m:
                 return m.group(1)
