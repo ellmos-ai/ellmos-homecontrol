@@ -33,7 +33,7 @@ Requires Python 3.10 or newer; there are no runtime dependencies. From a clone:
 
 ```bash
 pip install -e .
-pip install -e ".[dev]"   # pytest
+pip install -e ".[dev]"   # pytest, ruff
 ```
 
 ## Usage
@@ -56,12 +56,19 @@ hub = HomeControlHub(devices=[
 print(hub.hc_energy_status()["total_power_watts"])   # 40.0, demo is False for custom devices
 ```
 
-Tests live in `tests/test_homecontrol.py` (run with `pytest`).
+Tests live in `tests/` (`tests/test_homecontrol.py` and `tests/test_metadata.py`, run with `pytest`).
 
 ## Relation to ellmos and Open Ocean
 
 `ellmos-homecontrol` is one of the extension modules listed in the [Open Ocean](https://github.com/ellmos-ai/open-ocean) module map. Its FritzBox code was extracted from the smart-home handler of [BACH](https://github.com/ellmos-ai/bach). Module metadata is in `ellmos-module.v2.json`.
 
+## Documentation & Community
+
+- [Changelog](CHANGELOG.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+
 ## License
 
-MIT, as declared in `pyproject.toml`.
+[MIT](LICENSE), as declared in `pyproject.toml`.

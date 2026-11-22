@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package and dev dependencies
+        run: |
+          python -m pip install --upgrade pip "setuptools>=77.0.3"
+          python -m pip install -e ".[dev]"
+
+      - name: Verify dependency consistency
+        run: python -m pip check
+
+      - name: Verify packaging metadata (dry-run)
+        run: python -m pip install --no-build-isolation --dry-run .
+
+      - name: Git diff & whitespace check
+        run: git diff --check
+
+      - name: Bytecode compilation gate
+        run: python -m compileall -q src tests
+
+      - name: Lint with ruff
+        run: python -m ruff check src tests
+
+      - name: Run tests
+        run: python -m pytest -ra -v

@@ -1,0 +1,12 @@
+include LICENSE
+include README.md
+include README_de.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include SECURITY.md
+include CODE_OF_CONDUCT.md
+include ellmos-module.v2.json
+include pyproject.toml
+include src/ellmos_homecontrol/py.typed
+recursive-include tests *.py
+recursive-include assets *.svg *.png
