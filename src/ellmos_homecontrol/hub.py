@@ -1,4 +1,4 @@
-"""SmartHome & household appliance adapters and MCP-ready HomeControlHub."""
+"""SmartHome, household appliance, and vendor-neutral router adapters in HomeControlHub."""
 
 from __future__ import annotations
 
@@ -10,7 +10,13 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 
-_XML_ENTITIES = {'"': '&quot;', "'": '&apos;'}
+from .router import (
+    RouterAdapter,
+    RouterAuthorityGateError,
+    discover_router,
+)
+
+_XML_ENTITIES = {'"': "&quot;", "'": "&apos;"}
 _XML_TAG_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
 
 
@@ -92,8 +98,6 @@ class FritzBoxAdapter:
                 if elem.tag.endswith(tag):
                     return elem.text
         except ET.ParseError:
-            import re
-
             m = re.search(rf"<(?:\w+:)?{re.escape(tag)}>(.*?)</(?:\w+:)?{re.escape(tag)}>", xml_str, re.DOTALL)
             if m:
                 return m.group(1)
@@ -123,12 +127,18 @@ class MqttShellyAdapter:
 
 
 class HomeControlHub:
-    """Canonical MCP-aligned SmartHome and household appliance controller."""
+    """Canonical MCP-aligned SmartHome, household appliance, and vendor-neutral router controller."""
 
     HIGH_LOAD_THRESHOLD_WATTS = 2000.0
     SAFETY_CRITICAL_KINDS = {"oven", "stove", "lock", "garage_door", "heater_high_load"}
 
-    def __init__(self, devices: list[HomeDevice] | None = None, *, smarthome_permission: bool = True):
+    def __init__(
+        self,
+        devices: list[HomeDevice] | None = None,
+        *,
+        smarthome_permission: bool = True,
+        router: RouterAdapter | None = None,
+    ):
         self.smarthome_permission = smarthome_permission
         # Built-in sample devices are simulated data and must say so (Nutzerentscheidung E3).
         self.demo = devices is None
@@ -136,6 +146,7 @@ class HomeControlHub:
         self.homeassistant = HomeAssistantAdapter()
         self.matter = MatterBridgeAdapter()
         self.mqtt_shelly = MqttShellyAdapter()
+        self.router: RouterAdapter | None = router
         default_devices = [
             HomeDevice(
                 device_id="fritz.dect200.office",
@@ -193,6 +204,35 @@ class HomeControlHub:
     def _require_permission(self) -> None:
         if not self.smarthome_permission:
             raise PermissionError("SmartHome access is disabled in Permissions (smarthome_robotics=False).")
+
+    def _require_tier2_authority(self, capability: str, *, confirmed: bool, evidence_quote: str | None) -> None:
+        has_quote = bool(evidence_quote and evidence_quote.strip())
+        if not (confirmed or has_quote):
+            raise RouterAuthorityGateError(
+                capability,
+                tier=2,
+                message=(
+                    f"Tier-2 authority gate: '{capability}' requires confirmed=True or a non-empty user evidence_quote."
+                ),
+            )
+
+    def _require_tier3_hard_gate(self, capability: str, *, confirmed: bool, hard_gate_ack: bool) -> None:
+        if not (confirmed and hard_gate_ack):
+            raise RouterAuthorityGateError(
+                capability,
+                tier=3,
+                message=(
+                    f"Tier-3 hard gate (lockout risk): '{capability}' requires both confirmed=True and hard_gate_ack=True."
+                ),
+            )
+
+    def _get_or_discover_router(self, router: RouterAdapter | None, gateway_ip: str) -> RouterAdapter:
+        if router is not None:
+            return router
+        if self.router is not None:
+            return self.router
+        self.router = discover_router(gateway_ip)
+        return self.router
 
     def hc_list_devices(self, adapter: str | None = None) -> list[dict[str, Any]]:
         self._require_permission()
@@ -256,3 +296,79 @@ class HomeControlHub:
                 for adapter in ("fritzbox", "homeassistant", "matter", "mqtt_shelly")
             },
         }
+
+    # ---- Vendor-neutral router operations (`network-observer` & `router-operator`) ----
+
+    def hc_router_discover(self, gateway_ip: str = "192.0.2.1", **kwargs: Any) -> dict[str, Any]:
+        self._require_permission()
+        found = discover_router(gateway_ip, **kwargs)
+        self.router = found
+        return {
+            "schema": "ellmos.homecontrol.router.discover.v1",
+            "adapter": found.adapter_kind,
+            "gateway_ip": found.gateway_ip,
+            "capabilities": found.capabilities_dict(),
+        }
+
+    def hc_router_status(
+        self,
+        *,
+        router: RouterAdapter | None = None,
+        gateway_ip: str = "192.0.2.1",
+    ) -> dict[str, Any]:
+        self._require_permission()
+        target = self._get_or_discover_router(router, gateway_ip)
+        return target.get_status()
+
+    def hc_router_hosts(
+        self,
+        *,
+        router: RouterAdapter | None = None,
+        gateway_ip: str = "192.0.2.1",
+    ) -> list[dict[str, Any]]:
+        self._require_permission()
+        target = self._get_or_discover_router(router, gateway_ip)
+        return target.list_hosts()
+
+    def hc_router_wifi_status(
+        self,
+        *,
+        router: RouterAdapter | None = None,
+        gateway_ip: str = "192.0.2.1",
+    ) -> dict[str, Any]:
+        self._require_permission()
+        target = self._get_or_discover_router(router, gateway_ip)
+        return target.get_wifi_status()
+
+    def hc_router_set_guest_wifi(
+        self,
+        enabled: bool,
+        *,
+        confirmed: bool = False,
+        evidence_quote: str | None = None,
+        router: RouterAdapter | None = None,
+        gateway_ip: str = "192.0.2.1",
+    ) -> dict[str, Any]:
+        self._require_permission()
+        self._require_tier2_authority("router.set_guest_wifi", confirmed=confirmed, evidence_quote=evidence_quote)
+        target = self._get_or_discover_router(router, gateway_ip)
+        return target.set_guest_wifi(enabled)
+
+    def hc_router_set_wifi(
+        self,
+        enabled: bool,
+        *,
+        service_index: int = 1,
+        confirmed: bool = False,
+        hard_gate_ack: bool = False,
+        evidence_quote: str | None = None,
+        router: RouterAdapter | None = None,
+        gateway_ip: str = "192.0.2.1",
+    ) -> dict[str, Any]:
+        self._require_permission()
+        if not enabled:
+            self._require_tier3_hard_gate("router.set_wifi", confirmed=confirmed, hard_gate_ack=hard_gate_ack)
+        else:
+            self._require_tier2_authority("router.set_wifi", confirmed=confirmed, evidence_quote=evidence_quote)
+        target = self._get_or_discover_router(router, gateway_ip)
+        return target.set_wifi(enabled, service_index=service_index)

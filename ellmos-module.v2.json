@@ -4,10 +4,41 @@
   "name": "ellmos-homecontrol",
   "version": "0.1.0",
   "category": "smarthome-iot",
-  "description": "SmartHome and household appliance control hub (FritzBox, Home Assistant, Matter, MQTT/Shelly).",
+  "description": "SmartHome, household appliance, and vendor-neutral router control hub (FritzBox TR-064, Huawei HiLink, Home Assistant, Matter, MQTT/Shelly).",
   "repository": "https://github.com/ellmos-ai/ellmos-homecontrol",
   "entrypoints": {
     "python": "ellmos_homecontrol.hub",
     "cli": "ellmos_homecontrol.cli:main"
-  }
+  },
+  "roles": [
+    {
+      "id": "network-observer",
+      "description": "Read-only network and router telemetry without configuration mutations.",
+      "authority_tier": 1,
+      "requires_permission": "smarthome_robotics",
+      "capabilities": [
+        "router.discover",
+        "router.status",
+        "router.wan_info",
+        "router.list_hosts",
+        "router.wifi_status"
+      ]
+    },
+    {
+      "id": "router-operator",
+      "description": "Controlled router configuration with mandatory post-switch readback and Tier-2/Tier-3 authority gates.",
+      "authority_tier": 2,
+      "requires_permission": "smarthome_robotics",
+      "capabilities": [
+        "router.set_guest_wifi",
+        "router.set_wifi",
+        "router.wan_reconnect",
+        "router.set_dhcp_reservation"
+      ],
+      "hard_gate_tier3": [
+        "router.set_wifi_disable",
+        "router.reboot"
+      ]
+    }
+  ]
 }
